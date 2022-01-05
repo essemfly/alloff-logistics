@@ -11,6 +11,12 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
 from pathlib import Path
+from dotenv import load_dotenv, dotenv_values
+
+load_dotenv()  # take environment variables from .env.
+env = dotenv_values(".env")
+SERVICE_ENV_IS_DEV = env.get("SERVICE_ENV") != "prod"
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,7 +26,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-+j&1dbsxeo8v9c&)2$o!kce(y&zg%rz&-28a+qrbyj3)8o$3b6'
+SECRET_KEY = (
+    'django-insecure-+j&1dbsxeo8v9c&)2$o!kce(y&zg%rz&-28a+qrbyj3)8o$3b6'
+    if env.get("DJANGO_SECRET") is None
+    else env.get("DJANGO_SECRET")
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -37,6 +47,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'logistics',
 ]
 
 MIDDLEWARE = [
@@ -73,10 +84,20 @@ WSGI_APPLICATION = 'logistics_server.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
+DB_ENV_IS_LOCAL = env.get("DB_ENV") == "local"
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
+    }
+    if DB_ENV_IS_LOCAL
+    else {
+        "ENGINE": "django.db.backends.postgresql",
+        "HOST": env.get("DB_HOST"),
+        "NAME": env.get("DB_NAME"),
+        "PASSWORD": env.get("DB_PASSWORD"),
+        "USER": env.get("DB_USER"),
+        "PORT": 5432,
     }
 }
 
@@ -105,11 +126,11 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Seoul'
 
 USE_I18N = True
 
-USE_TZ = True
+USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)
