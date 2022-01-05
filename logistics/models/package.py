@@ -1,6 +1,10 @@
+from django.contrib.auth.models import User
+from django.contrib.postgres.fields import ArrayField
 from django.db import models
+import uuid
 
-from core.models import Courier, User
+from .courier import Courier
+from .inventory import Inventory
 
 
 class PackageStatus(models.TextChoices):
@@ -36,12 +40,12 @@ class PackageRemarkRecord(models.Model):
     description = models.CharField(max_length=50)
     reference = models.CharField(max_length=50, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    created_by = models.ForeignKey(User)
+    created_by = models.ForeignKey(User, on_delete=models.DO_NOTHING)
 
 
 class Package(models.Model):
 
-    key = models.UUIDField(unique=True)
+    key = models.UUIDField(unique=True, default=uuid.uuid4, editable=False)
 
     status = models.CharField(
         max_length=50,
@@ -50,15 +54,15 @@ class Package(models.Model):
     remark_records = models.ForeignKey(
         PackageRemarkRecord, on_delete=models.CASCADE,
     )
-    related_order_items = models.ForeignKey(
-        'OrderItem', on_delete=models.DO_NOTHING)
-    inventories = models.ForeignKey('Inventory', on_delete=models.DO_NOTHING)
+    related_order_item_ids = ArrayField(
+        base_field=models.CharField(max_length=20), default=list)
+    inventories = models.ForeignKey(Inventory, on_delete=models.DO_NOTHING)
 
     # destination address
     customer_name = models.CharField(max_length=20)
     customer_contact = models.CharField(max_length=13)
     base_address = models.CharField(max_length=255)
-    detail_address = models.CharField(null=True, blank=True)
+    detail_address = models.CharField(max_length=50, null=True, blank=True)
     postal_code = models.CharField(max_length=6)
     delivery_note = models.CharField(max_length=50)
 
