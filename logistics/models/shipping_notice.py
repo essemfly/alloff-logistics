@@ -35,8 +35,9 @@ class ShippingNotice(models.Model):
     def __str__(self):
         return f"""Shipping Notice: {self.code}"""
 
-    def save(self, force_insert=False, force_update=False, using=None,
-             update_fields=None):
+    def save(
+        self, force_insert=False, force_update=False, using=None, update_fields=None
+    ):
         if self.code is None or self.code == "":
             self.code = ShippingNotice.generate_usable_code()
 
@@ -80,12 +81,14 @@ class ShippingNotice(models.Model):
         today = _today.isoformat()[2:].replace("-", "")
 
         today_notices_count = ShippingNotice.objects.filter(
-            created_at__gte=_today, created_at__lt=_tomorrow).count()
+            created_at__gte=_today, created_at__lt=_tomorrow
+        ).count()
         sequence = f"{today_notices_count + 1}".zfill(2)
         return f"""SHP-{today}-{sequence}"""
 
 
 class ShippingNoticeItem(models.Model):
     notice = models.ForeignKey(
-        to=ShippingNotice, on_delete=models.CASCADE, related_name='items')
+        to=ShippingNotice, on_delete=models.CASCADE, related_name="items"
+    )
     inventory = models.OneToOneField(to=Inventory, on_delete=models.PROTECT)

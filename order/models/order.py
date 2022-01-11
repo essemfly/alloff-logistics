@@ -46,7 +46,11 @@ class Order(models.Model):
     # tracking info
     tracking_number = models.CharField(max_length=50, null=True, blank=True)
     tracking_courier = models.ForeignKey(
-        Courier, on_delete=models.DO_NOTHING, null=True, blank=True,)
+        Courier,
+        on_delete=models.DO_NOTHING,
+        null=True,
+        blank=True,
+    )
 
     # status
     confirmed_at = models.DateTimeField(null=True, blank=True)
@@ -63,16 +67,19 @@ class Order(models.Model):
 
     def create_received_items(self):
 
-        [ReceivedItem.objects.create(
-            # code=self.code, # todo: create sourcing code
-            status=ReceivedItemStatus.SOURCING_REQUIRED,
-            product_id=product.product_id,
-            product_brand_id=product.brand_id,
-            product_brand_name=product.brand_name,
-            product_name=product.name,
-            product_size=product.size,
-            product_color=product.color,
-        ) for product in self.products.all()]
+        [
+            ReceivedItem.objects.create(
+                # code=self.code, # todo: create sourcing code
+                status=ReceivedItemStatus.SOURCING_REQUIRED,
+                product_id=product.product_id,
+                product_brand_id=product.brand_id,
+                product_brand_name=product.brand_name,
+                product_name=product.name,
+                product_size=product.size,
+                product_color=product.color,
+            )
+            for product in self.products.all()
+        ]
 
     def __str__(self):
         return f"#{self.id} {self.customer_name}"
@@ -86,5 +93,4 @@ class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.DO_NOTHING)
     product = models.ForeignKey(Product, on_delete=models.DO_NOTHING)
     quantity = models.PositiveSmallIntegerField()
-    received_item = models.ForeignKey(
-        ReceivedItem, on_delete=models.DO_NOTHING)
+    received_item = models.ForeignKey(ReceivedItem, on_delete=models.DO_NOTHING)
