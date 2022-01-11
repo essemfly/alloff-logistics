@@ -1,8 +1,8 @@
-import uuid
 from django.db import models
 
 from logistics.models import Courier, ReceivedItem
 from logistics.models.received_item import ReceivedItemStatus
+from order.models.common import Product
 
 
 class OrderStatus(models.TextChoices):
@@ -17,34 +17,7 @@ class OrderStatus(models.TextChoices):
     CANCEL_FINISHED = "CANCEL_FINISHED"
 
 
-class Brand(models.Model):
-    key = models.UUIDField(unique=True, default=uuid.uuid4, editable=False)
-    name = models.CharField(max_length=50,)
-
-    def __str__(self):
-        return f"#{self.id} {self.name} ({self.key})"
-
-
-class Product(models.Model):
-    key = models.UUIDField(unique=True, default=uuid.uuid4, editable=False)
-    brand = models.ForeignKey(Brand, on_delete=models.DO_NOTHING)
-    name = models.CharField(max_length=50,)
-    size = models.CharField(max_length=50,)
-    color = models.CharField(max_length=50,)
-
-    @property
-    def brand_id(self):
-        return self.brand.id
-
-    @property
-    def brand_name(self):
-        return self.brand.name
-
-    def __str__(self):
-        return f"#{self.id} {self.name} ({self.key})"
-
-
-class LogisticsOrder(models.Model):
+class Order(models.Model):
 
     order_status = models.CharField(
         max_length=50,
@@ -64,6 +37,9 @@ class LogisticsOrder(models.Model):
 
     # payment info
     transaction_id = models.CharField(max_length=255)
+    product_price = models.IntegerField()
+    delivery_price = models.IntegerField()
+    total_price = models.IntegerField()
 
     products = models.ManyToManyField(Product, blank=True)
 
@@ -74,7 +50,8 @@ class LogisticsOrder(models.Model):
 
     # status
     confirmed_at = models.DateTimeField(null=True, blank=True)
-    canceled_at = models.DateTimeField(null=True, blank=True)
+    cancel_requested_at = models.DateTimeField(null=True, blank=True)
+    cancel_confirmed_at = models.DateTimeField(null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -102,10 +79,12 @@ class LogisticsOrder(models.Model):
 
     @property
     def order_items(self):
-        return LogisticsOrderItem.objects.filter(order__id=self.id)
+        return OrderItem.objects.filter(order__id=self.id)
 
 
-class LogisticsOrderItem(models.Model):
-    order = models.ForeignKey(LogisticsOrder, on_delete=models.DO_NOTHING)
+class OrderItem(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.DO_NOTHING)
+    product = models.ForeignKey(Product, on_delete=models.DO_NOTHING)
+    quantity = models.PositiveSmallIntegerField()
     received_item = models.ForeignKey(
         ReceivedItem, on_delete=models.DO_NOTHING)
