@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'logistics',
+    'order',
 ]
 
 MIDDLEWARE = [
@@ -87,8 +88,12 @@ WSGI_APPLICATION = 'logistics_server.wsgi.application'
 DB_ENV_IS_LOCAL = env.get("DB_ENV") == "local"
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "ENGINE": "django.db.backends.postgresql",
+        "HOST": "localhost",
+        "NAME": "logistics_dev",
+        "PASSWORD": "Less202!",
+        "USER": "dev",
+        "PORT": 5432,
     }
     if DB_ENV_IS_LOCAL
     else {
@@ -97,7 +102,6 @@ DATABASES = {
         "NAME": env.get("DB_NAME"),
         "PASSWORD": env.get("DB_PASSWORD"),
         "USER": env.get("DB_USER"),
-        "PORT": 5432,
     }
 }
 
