@@ -29,3 +29,5 @@ coverage.xml
 
 # etc
 .DS_Store
+
+*.sh
