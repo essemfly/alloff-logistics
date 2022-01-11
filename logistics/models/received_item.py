@@ -1,9 +1,5 @@
 from django.db import models
-from itertools import chain
-
-from logistics.models.inventory import Inventory
-
-
+from logistics.models.inventory import Inventory, InventoryStatus
 from .common import Log
 
 
@@ -39,20 +35,39 @@ class ReceivedItem(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     deleted_at = models.DateTimeField(null=True, blank=True)
-    log = models.ManyToManyField(
-        Log, related_name='received_items', null=True, blank=True,)
+    # log = models.ManyToManyField(
+    #     Log, related_name='received_items', null=True, blank=True,)
 
     def __str__(self):
         return f"#{self.id} {self.product_name} ({self.code})"
 
-    def to_dict(instance):
-        opts = instance._meta
-        data = {}
-        for f in chain(opts.concrete_fields, opts.private_fields):
-            data[f.name] = f.value_from_object(instance)
-        for f in opts.many_to_many:
-            data[f.name] = [i.id for i in f.value_from_object(instance)]
-        return data
+    def change_status(self, request, status):
+        if status == self.status:  # same status
+            return
+
+        ReceivedItemLog.objects.create(
+            received_item=self,
+            description=f"change status {self.status} >> {status}",
+            created_by=request.user,
+        )
+        self.status = status
+
+        if status == ReceivedItemStatus.RECEIVED:
+            self.inventory = self.create_inventory()
+
+        self.save()
+
+    def create_inventory(self):
+        new_inventory = Inventory.objects.create(
+            code=self.code,
+            status=InventoryStatus.PROCESSING_NEEDED,
+            product_id=self.product_id,
+            product_brand_name=self.product_brand_name,
+            product_name=self.product_name,
+            product_size=self.product_size,
+            product_color=self.product_color,
+        )
+        return new_inventory
 
     @property
     def product_code(self):
@@ -61,3 +76,8 @@ class ReceivedItem(models.Model):
     @property
     def product_option(self):
         return f"{self.product_color}___{''.join(self.product_size.split())}"
+
+
+class ReceivedItemLog(Log):
+    received_item = models.ForeignKey(
+        to=ReceivedItem, on_delete=models.DO_NOTHING)

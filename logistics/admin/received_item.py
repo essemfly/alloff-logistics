@@ -1,11 +1,5 @@
-from django.contrib import admin, messages
-from django.utils.translation import ngettext
-from logistics.models.common import Log
-
-
-from logistics.models.received_item import ReceivedItem, ReceivedItemStatus
-
-
+from django.contrib import admin
+from logistics.models.received_item import ReceivedItem, ReceivedItemStatus, ReceivedItemLog
 from .helpers import create_copy_button, create_filter_button, format_date
 
 received_item_status = {
@@ -17,6 +11,21 @@ received_item_status = {
 }
 
 
+class ReceivedItemLogInline(admin.TabularInline):
+    model = ReceivedItemLog
+    readonly_fields = ('__str__', )
+    extra = 0
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
 @admin.register(ReceivedItem)
 class ReceivedItemAdmin(admin.ModelAdmin):
 
@@ -25,7 +34,7 @@ class ReceivedItemAdmin(admin.ModelAdmin):
     list_filter = ('status', 'created_at', )
     search_fields = ('product_name', 'product_brand', 'code')
 
-    readonly_fields = ['log', ]
+    readonly_fields = ('created_at', 'updated_at', 'deleted_at', )
 
     @admin.display(description='code')
     def copyable_code(self, obj):
@@ -46,42 +55,40 @@ class ReceivedItemAdmin(admin.ModelAdmin):
         'make_received',
         'make_out_of_stock',
         'make_canceled',
+
     ]
 
     @admin.action(description='Mark status as SOURCING_REQUIRED',)
-    def make_sourcing_required(self, request, queryset):
-        queryset.update(status=ReceivedItemStatus.SOURCING_REQUIRED)
+    def make_sourcing_required(self, *args, **kwargs):
+        self._change_status(
+            status=ReceivedItemStatus.SOURCING_REQUIRED, *args, **kwargs)
 
     @admin.action(description='Mark status as ON_RECEIVING',)
-    def make_on_receiving(self, request, queryset):
-        queryset.update(status=ReceivedItemStatus.ON_RECEIVING)
+    def make_on_receiving(self, *args, **kwargs):
+        self._change_status(
+            status=ReceivedItemStatus.ON_RECEIVING, *args, **kwargs)
 
     @admin.action(description='Mark status as RECEIVED',)
-    def make_received(self, request, queryset):
-        queryset.update(status=ReceivedItemStatus.RECEIVED)
+    def make_received(self, *args, **kwargs):
+        self._change_status(
+            status=ReceivedItemStatus.RECEIVED, *args, **kwargs)
 
     @admin.action(description='Mark status as OUT_OF_STOCK',)
-    def make_out_of_stock(self, request, queryset):
-        queryset.update(status=ReceivedItemStatus.OUT_OF_STOCK)
+    def make_out_of_stock(self, *args, **kwargs):
+        self._change_status(
+            status=ReceivedItemStatus.OUT_OF_STOCK, *args, **kwargs)
 
     @admin.action(description='Mark status as CANCELED',)
-    def make_canceled(self, request, queryset):
-        queryset.update(status=ReceivedItemStatus.CANCELED)
+    def make_canceled(self, *args, **kwargs):
+        self._change_status(
+            status=ReceivedItemStatus.CANCELED, *args, **kwargs)
 
-    def save_model(self, request, obj, form, change):
-        # todo: logging detail changes
-        # request_body = request.POST.dict()
-        # intance = obj.to_dict()
-        if change:
-            new_log = Log.objects.create(
-                description="change status", created_by=request.user)
-            obj.log.add(new_log)
-        return super().save_model(request, obj, form, change)
-
-
-def get_change_status_message(field_name, status, number):
-    return ngettext(
-        f'%d {field_name} was successfully marked status as {status}.',
-        f'%d {field_name}s were successfully marked status as {status}.',
-        number,
-    ) % number
+    def _change_status(self, request, queryset, status):
+        [
+            instance.change_status(
+                request=request,
+                status=status,
+            )
+            for instance
+            in queryset.all()
+        ]
