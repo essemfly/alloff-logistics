@@ -1,9 +1,4 @@
 from django.db import models
-from django.contrib.postgres.fields import JSONField
-
-from logistics.models import ReceivedItem
-from logistics.models.received_item import ReceivedItemStatus
-from .orderitem import OrderItem
 
 
 class OrderStatus(models.TextChoices):
@@ -21,24 +16,21 @@ class OrderStatus(models.TextChoices):
     CANCEL_FINISHED = "CANCEL_FINISHED"
 
 
-class OrderType(models.TextChoices):
-    NORMAL_ORDER = "NORMAL_ORDER"
-    TIMEDEAL_ORDER = "TIMEDEAL_ORDER"
-    EXHIBITION_ORDER = "EXHIBITION_ORDER"
-    UNKNOWN_ORDER = "UNKNOWN_ORDER"
-
-
 class Order(models.Model):
     alloff_order_id = models.CharField(max_length=100)
-    user = JSONField()
     order_status = models.CharField(
         max_length=50,
         choices=OrderStatus.choices,
     )
+
+    # user
+    user = models.JSONField()
+    user_note = models.CharField(max_length=50)
+
+    # price
     product_price = models.IntegerField()
     delivery_price = models.IntegerField()
     total_price = models.IntegerField()
-    user_note = models.CharField(max_length=50)
 
     # timestamp
     created_at = models.DateTimeField(auto_now_add=True)
@@ -50,28 +42,9 @@ class Order(models.Model):
     cancel_finished_at = models.DateTimeField(null=True, blank=True)
     confirmed_at = models.DateTimeField(null=True, blank=True)
 
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-        self.create_received_items()
-
-    def create_received_items(self):
-        [
-            ReceivedItem.objects.create(
-                # code=self.code, # todo: create sourcing code
-                status=ReceivedItemStatus.SOURCING_REQUIRED,
-                product_id=product.product_id,
-                product_brand_id=product.brand_id,
-                product_brand_name=product.brand_name,
-                product_name=product.name,
-                product_size=product.size,
-                product_color=product.color,
-            )
-            for product in self.products.all()
-        ]
-
     def __str__(self):
-        return f"#{self.id} {self.customer_name}"
+        return f"#{self.id} {self.alloff_order_id}"
 
     @property
     def order_items(self):
-        return OrderItem.objects.filter(order__id=self.id)
+        return "OrderItem".objects.filter(order__id=self.id)

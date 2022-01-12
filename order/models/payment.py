@@ -1,4 +1,3 @@
-import uuid
 from django.db import models
 
 
@@ -30,3 +29,6 @@ class Payment(models.Model):
     app_scheme = models.CharField(max_length=50)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"#{self.id} [{self.pg}] {self.imp_uid}"
