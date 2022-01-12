@@ -30,7 +30,8 @@ class ReceivedItem(models.Model):
 
     # inventory
     inventory = models.ForeignKey(
-        Inventory, on_delete=models.PROTECT, null=True, blank=True)
+        Inventory, on_delete=models.PROTECT, null=True, blank=True
+    )
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -79,5 +80,4 @@ class ReceivedItem(models.Model):
 
 
 class ReceivedItemLog(Log):
-    received_item = models.ForeignKey(
-        to=ReceivedItem, on_delete=models.DO_NOTHING)
+    received_item = models.ForeignKey(to=ReceivedItem, on_delete=models.DO_NOTHING)

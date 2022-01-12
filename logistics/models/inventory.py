@@ -30,7 +30,7 @@ class Inventory(models.Model):
     deleted_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
-        verbose_name_plural = 'inventories'
+        verbose_name_plural = "inventories"
 
     def __str__(self):
         return f"#{self.id} {self.product_name} ({self.code})"
