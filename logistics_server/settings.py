@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
 import os
-from pathlib import Path
+from django.contrib.staticfiles import handlers
 from dotenv import load_dotenv, dotenv_values
 
 load_dotenv()  # take environment variables from .env.
@@ -20,7 +20,7 @@ SERVICE_ENV_IS_DEV = env.get("SERVICE_ENV") != "prod"
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 # Quick-start development settings - unsuitable for production
@@ -37,6 +37,8 @@ SECRET_KEY = (
 DEBUG = True
 
 ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
     ".ap-northeast-2.compute.amazonaws.com",
 ]
 
@@ -143,8 +145,19 @@ USE_TZ = False
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
+
+# extend StaticFilesHandler to add "Access-Control-Allow-Origin" to every response
+class CORSStaticFilesHandler(handlers.StaticFilesHandler):
+    def serve(self, request):
+        response = super().serve(request)
+        response["Access-Control-Allow-Origin"] = "*"
+        return response
+
+
+# monkeypatch handlers to use our class instead of the original StaticFilesHandler
+handlers.StaticFilesHandler = CORSStaticFilesHandler
 
 
 # Default primary key field type
