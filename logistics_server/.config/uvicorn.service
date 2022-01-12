@@ -6,7 +6,7 @@ After=network.target
 User=root
 Group=www-data
 ExecStart=/home/ubuntu/.pyenv/versions/uvicorn-env/bin/gunicorn logistics_server.asgi:application -k uvicorn.workers.UvicornWorker -b 0.0.0.0:8000
-WorkingDirectory=/srv/logistics_server
+WorkingDirectory=/srv/logistics-server
 
 [Install]
 WantedBy=multi-user.target
