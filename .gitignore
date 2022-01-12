@@ -31,3 +31,5 @@ coverage.xml
 .DS_Store
 
 *.sh
+
+/static
