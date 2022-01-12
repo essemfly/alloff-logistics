@@ -1,6 +1,7 @@
 from django.contrib import admin
 from logistics.models.inventory import Inventory, InventoryStatus, InventoryLog
-from .helpers import create_copy_button, create_filter_button, format_date
+
+from lib.helpers import create_copy_button, create_filter_button, format_date
 
 inventory_status = {
     "PROCESSING_NEEDED": "프로세싱 필요함",
@@ -12,7 +13,7 @@ inventory_status = {
 
 class InventoryLogInline(admin.TabularInline):
     model = InventoryLog
-    readonly_fields = ('__str__', )
+    readonly_fields = ("__str__",)
     extra = 0
 
     def has_change_permission(self, request, obj=None):
@@ -28,35 +29,40 @@ class InventoryLogInline(admin.TabularInline):
 @admin.register(Inventory)
 class InventoryAdmin(admin.ModelAdmin):
 
-    list_display = ('__str__', 'id', 'product_name',
-                    'filterable_brand', 'status', 'copyable_code', 'created',)
-    list_filter = ('status', 'created_at', )
-    search_fields = ('product_name', 'product_brand', 'code')
+    list_display = (
+        "__str__",
+        "id",
+        "product_name",
+        "filterable_brand",
+        "status",
+        "copyable_code",
+        "created",
+    )
+    list_filter = (
+        "status",
+        "created_at",
+    )
+    search_fields = ("product_name", "product_brand", "code")
 
-    readonly_fields = ('created_at', 'updated_at', 'deleted_at', )
-    inlines = [InventoryLogInline, ]
+    readonly_fields = (
+        "created_at",
+        "updated_at",
+        "deleted_at",
+    )
+    inlines = [
+        InventoryLogInline,
+    ]
 
-    @admin.display(description='code')
+    @admin.display(description="code")
     def copyable_code(self, obj):
         return create_copy_button(obj.code)
 
-    @admin.display(description='brand')
+    @admin.display(description="brand")
     def filterable_brand(self, obj):
-        return create_filter_button('product_brand_id', obj.product_brand_id, obj.product_brand_name)
+        return create_filter_button(
+            "product_brand_id", obj.product_brand_id, obj.product_brand_name
+        )
 
-    @admin.display(description='created')
+    @admin.display(description="created")
     def created(self, obj):
         return format_date(obj.created_at)
-
-    # actions
-    actions = [
-        'make_sourcing_required',
-    ]
-
-    @admin.action(description='Mark status as SOURCING_REQUIRED',)
-    def make_sourcing_required(self, request, queryset):
-        instance = queryset.get()
-        instance.change_status(
-            request=request,
-            status=InventoryStatus.SOURCING_REQUIRED,
-        )
