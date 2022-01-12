@@ -1,0 +1,12 @@
+[Unit]
+Description= Dev server instance to serve logistics service
+After=network.target
+
+[Service]
+User=root
+Group=www-data
+ExecStart=/home/ubuntu/.pyenv/versions/uvicorn-env/bin/gunicorn logistics_server.asgi:application -k uvicorn.workers.UvicornWorker -b 0.0.0.0:8000
+WorkingDirectory=/srv/logistics_server
+
+[Install]
+WantedBy=multi-user.target
