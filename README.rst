@@ -26,6 +26,14 @@ Install dependencies
     cd logistics-server
     poetry install
 
+
+If you are first run, database migration is required
+----------------------------------------------------
+
+.. code-block:: bash
+
+    poetry run ./managy.py migrate
+
 Run server
 ==========
 
