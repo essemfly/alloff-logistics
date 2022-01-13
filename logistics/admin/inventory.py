@@ -2,8 +2,11 @@ from django.contrib import admin
 from logistics.models.inventory import Inventory, InventoryStatus, InventoryLog
 
 from lib.helpers import create_copy_button, create_filter_button, format_date
+from lib.admin import LogTabularInline
+
 
 inventory_status = {
+    "CREATED": "생성됨",
     "PROCESSING_NEEDED": "프로세싱 필요함",
     "IN_STOCK": "재고 있음",
     "SHIPPING_PENDING": "발송 준비중",
@@ -11,19 +14,8 @@ inventory_status = {
 }
 
 
-class InventoryLogInline(admin.TabularInline):
+class InventoryLogInline(LogTabularInline):
     model = InventoryLog
-    readonly_fields = ("__str__",)
-    extra = 0
-
-    def has_change_permission(self, request, obj=None):
-        return False
-
-    def has_add_permission(self, request, obj=None):
-        return False
-
-    def has_delete_permission(self, request, obj=None):
-        return False
 
 
 @admin.register(Inventory)
@@ -66,3 +58,51 @@ class InventoryAdmin(admin.ModelAdmin):
     @admin.display(description="created")
     def created(self, obj):
         return format_date(obj.created_at)
+
+    # actions
+    actions = [
+        "make_created",
+        "make_in_stock",
+        "make_processing_needed",
+        "make_shipped",
+        "make_shipping_pending",
+    ]
+
+    @admin.action(
+        description="Mark status as CREATED",
+    )
+    def make_created(self, *args, **kwargs):
+        self._change_status(status=InventoryStatus.CREATED, *args, **kwargs)
+
+    @admin.action(
+        description="Mark status as IN_STOCK",
+    )
+    def make_in_stock(self, *args, **kwargs):
+        self._change_status(status=InventoryStatus.IN_STOCK, *args, **kwargs)
+
+    @admin.action(
+        description="Mark status as PROCESSING_NEEDED",
+    )
+    def make_processing_needed(self, *args, **kwargs):
+        self._change_status(status=InventoryStatus.PROCESSING_NEEDED, *args, **kwargs)
+
+    @admin.action(
+        description="Mark status as SHIPPED",
+    )
+    def make_shipped(self, *args, **kwargs):
+        self._change_status(status=InventoryStatus.SHIPPED, *args, **kwargs)
+
+    @admin.action(
+        description="Mark status as SHIPPING_PENDING",
+    )
+    def make_shipping_pending(self, *args, **kwargs):
+        self._change_status(status=InventoryStatus.SHIPPING_PENDING, *args, **kwargs)
+
+    def _change_status(self, request, queryset, status):
+        [
+            instance.change_status(
+                request=request,
+                status=status,
+            )
+            for instance in queryset.all()
+        ]

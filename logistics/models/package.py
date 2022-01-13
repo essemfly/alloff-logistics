@@ -52,13 +52,14 @@ class Package(models.Model):
         choices=PackageStatus.choices,
     )
     remark_records = models.ForeignKey(
-        PackageRemarkRecord,
-        on_delete=models.CASCADE,
+        PackageRemarkRecord, on_delete=models.CASCADE, related_name="package"
     )
     related_order_item_ids = ArrayField(
         base_field=models.CharField(max_length=20), default=list
     )
-    inventories = models.ForeignKey(Inventory, on_delete=models.DO_NOTHING)
+    inventories = models.ForeignKey(
+        Inventory, on_delete=models.DO_NOTHING, related_name="package"
+    )
 
     # destination address
     customer_name = models.CharField(max_length=20)

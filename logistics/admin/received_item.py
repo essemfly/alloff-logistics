@@ -5,6 +5,8 @@ from logistics.models.received_item import (
     ReceivedItemLog,
 )
 from lib.helpers import create_copy_button, create_filter_button, format_date
+from lib.admin import LogTabularInline
+
 
 received_item_status = {
     "SOURCING_REQUIRED": "발주 필요",
@@ -15,19 +17,8 @@ received_item_status = {
 }
 
 
-class ReceivedItemLogInline(admin.TabularInline):
+class ReceivedItemLogInline(LogTabularInline):
     model = ReceivedItemLog
-    readonly_fields = ("__str__",)
-    extra = 0
-
-    def has_change_permission(self, request, obj=None):
-        return False
-
-    def has_add_permission(self, request, obj=None):
-        return False
-
-    def has_delete_permission(self, request, obj=None):
-        return False
 
 
 @admin.register(ReceivedItem)
@@ -53,6 +44,8 @@ class ReceivedItemAdmin(admin.ModelAdmin):
         "updated_at",
         "deleted_at",
     )
+
+    inlines = (ReceivedItemLogInline,)
 
     @admin.display(description="code")
     def copyable_code(self, obj):

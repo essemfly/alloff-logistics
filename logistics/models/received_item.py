@@ -30,14 +30,16 @@ class ReceivedItem(models.Model):
 
     # inventory
     inventory = models.ForeignKey(
-        Inventory, on_delete=models.PROTECT, null=True, blank=True
+        Inventory,
+        on_delete=models.PROTECT,
+        related_name="received_item",
+        null=True,
+        blank=True,
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     deleted_at = models.DateTimeField(null=True, blank=True)
-    # log = models.ManyToManyField(
-    #     Log, related_name='received_items', null=True, blank=True,)
 
     def __str__(self):
         return f"#{self.id} {self.product_name} ({self.code})"
@@ -50,19 +52,24 @@ class ReceivedItem(models.Model):
             received_item=self,
             description=f"change status {self.status} >> {status}",
             created_by=request.user,
+            field_name="status",
+            before=self.status,
+            after=status,
         )
         self.status = status
 
         if status == ReceivedItemStatus.RECEIVED:
-            self.inventory = self.create_inventory()
+            if self.inventory is None:
+                self.inventory = self.create_inventory()
 
         self.save()
 
     def create_inventory(self):
         new_inventory = Inventory.objects.create(
             code=self.code,
-            status=InventoryStatus.PROCESSING_NEEDED,
+            status=InventoryStatus.CREATED,
             product_id=self.product_id,
+            product_brand_id=self.product_brand_id,
             product_brand_name=self.product_brand_name,
             product_name=self.product_name,
             product_size=self.product_size,
