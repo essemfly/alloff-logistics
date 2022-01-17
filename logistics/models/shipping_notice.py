@@ -92,3 +92,7 @@ class ShippingNoticeItem(models.Model):
         ShippingNotice, on_delete=models.CASCADE, related_name="shipping_notice_item"
     )
     inventory = models.OneToOneField(to=Inventory, on_delete=models.PROTECT)
+class ShippingNoticeLog(Log):
+    notice = models.ForeignKey(ShippingNotice, on_delete=models.DO_NOTHING)
+
+
