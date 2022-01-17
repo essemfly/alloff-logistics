@@ -84,6 +84,8 @@ class OrderItem(models.Model):
     def create_received_item(self):
         for _ in range(self.quantity):
             ReceivedItem.objects.create(
+                order_id=self.order.id,
+                order_item_id=self.id,
                 code=self.order_item_code,
                 status=ReceivedItemStatus.SOURCING_REQUIRED,
                 product_brand_id=self.brand_key_name,
