@@ -98,6 +98,7 @@ class Migration(migrations.Migration):
             name='ReceivedItem',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('order_id', models.CharField(db_index=True, max_length=50)),
                 ('code', models.CharField(db_index=True, max_length=30)),
                 ('status', models.CharField(choices=[('SOURCING_REQUIRED', 'Sourcing Required'), ('ON_RECEIVING', 'On Receiving'), ('RECEIVED', 'Received'), ('OUT_OF_STOCK', 'Out Of Stock'), ('CANCELED', 'Canceled')], default='SOURCING_REQUIRED', max_length=50)),
                 ('product_id', models.CharField(max_length=20)),
