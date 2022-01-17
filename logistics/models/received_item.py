@@ -13,6 +13,8 @@ class ReceivedItemStatus(models.TextChoices):
 
 class ReceivedItem(models.Model):
 
+    order_id = models.CharField(max_length=50)
+    order_item_id = models.CharField(max_length=50)
     code = models.CharField(max_length=30, db_index=True)
     status = models.CharField(
         max_length=50,

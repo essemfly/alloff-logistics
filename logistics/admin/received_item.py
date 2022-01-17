@@ -122,7 +122,9 @@ class ReceivedItemAdmin(admin.ModelAdmin):
             shipping_notice = ShippingNotice.objects.create()
             for instance in queryset:
                 ShippingNoticeItem.objects.create(
-                    notice=shipping_notice, inventory=instance.inventory
+                    order_item_id=instance.order_item_id,
+                    notice=shipping_notice,
+                    inventory=instance.inventory,
                 )
         else:
             # error message
