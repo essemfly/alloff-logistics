@@ -59,6 +59,26 @@ class Migration(migrations.Migration):
             ],
         ),
         migrations.CreateModel(
+            name='Package',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('key', models.UUIDField(default=uuid.uuid4, editable=False, unique=True)),
+                ('status', models.CharField(choices=[('DELIVERY_PREPARING', 'Delivery Preparing'), ('DELIVERY_STARTED', 'Delivery Started'), ('DELIVERY_FINISHED', 'Delivery Finished'), ('OVERSEA_SHIPMENT_PREPARING', 'Oversea Shipment Preparing'), ('OVERSEA_SHIPMENT_STARTED', 'Oversea Shipment Started'), ('CANCEL_REQUESTED', 'Cancel Requested'), ('CANCEL_PENDING', 'Cancel Pending'), ('CANCEL_FINISHED', 'Cancel Finished')], max_length=50)),
+                ('related_order_item_ids', django.contrib.postgres.fields.ArrayField(base_field=models.CharField(max_length=20), default=list, size=None)),
+                ('customer_name', models.CharField(max_length=20)),
+                ('customer_contact', models.CharField(max_length=13)),
+                ('base_address', models.CharField(max_length=255)),
+                ('detail_address', models.CharField(blank=True, max_length=50, null=True)),
+                ('postal_code', models.CharField(max_length=6)),
+                ('delivery_note', models.CharField(blank=True, max_length=50, null=True)),
+                ('tracking_number', models.CharField(blank=True, max_length=50, null=True)),
+                ('created_at', models.DateTimeField(auto_now_add=True)),
+                ('updated_at', models.DateTimeField(auto_now=True)),
+                ('deleted_at', models.DateTimeField(blank=True, null=True)),
+                ('tracking_courier', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.DO_NOTHING, to='logistics.courier')),
+            ],
+        ),
+        migrations.CreateModel(
             name='ShippingNotice',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
@@ -98,7 +118,8 @@ class Migration(migrations.Migration):
             name='ReceivedItem',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('order_id', models.CharField(db_index=True, max_length=50)),
+                ('order_id', models.CharField(max_length=50)),
+                ('order_item_id', models.CharField(max_length=50)),
                 ('code', models.CharField(db_index=True, max_length=30)),
                 ('status', models.CharField(choices=[('SOURCING_REQUIRED', 'Sourcing Required'), ('ON_RECEIVING', 'On Receiving'), ('RECEIVED', 'Received'), ('OUT_OF_STOCK', 'Out Of Stock'), ('CANCELED', 'Canceled')], default='SOURCING_REQUIRED', max_length=50)),
                 ('product_id', models.CharField(max_length=20)),
@@ -124,27 +145,10 @@ class Migration(migrations.Migration):
                 ('created_by', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, to='auth.user')),
             ],
         ),
-        migrations.CreateModel(
-            name='Package',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('key', models.UUIDField(default=uuid.uuid4, editable=False, unique=True)),
-                ('status', models.CharField(choices=[('DELIVERY_PREPARING', 'Delivery Preparing'), ('DELIVERY_STARTED', 'Delivery Started'), ('DELIVERY_FINISHED', 'Delivery Finished'), ('OVERSEA_SHIPMENT_PREPARING', 'Oversea Shipment Preparing'), ('OVERSEA_SHIPMENT_STARTED', 'Oversea Shipment Started'), ('CANCEL_REQUESTED', 'Cancel Requested'), ('CANCEL_PENDING', 'Cancel Pending'), ('CANCEL_FINISHED', 'Cancel Finished')], max_length=50)),
-                ('related_order_item_ids', django.contrib.postgres.fields.ArrayField(base_field=models.CharField(max_length=20), default=list, size=None)),
-                ('customer_name', models.CharField(max_length=20)),
-                ('customer_contact', models.CharField(max_length=13)),
-                ('base_address', models.CharField(max_length=255)),
-                ('detail_address', models.CharField(blank=True, max_length=50, null=True)),
-                ('postal_code', models.CharField(max_length=6)),
-                ('delivery_note', models.CharField(max_length=50)),
-                ('tracking_number', models.CharField(max_length=50)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('deleted_at', models.DateTimeField(blank=True, null=True)),
-                ('inventories', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, related_name='package', to='logistics.inventory')),
-                ('remark_records', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='package', to='logistics.packageremarkrecord')),
-                ('tracking_courier', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, to='logistics.courier')),
-            ],
+        migrations.AddField(
+            model_name='inventory',
+            name='package',
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='inventory', to='logistics.package'),
         ),
         migrations.CreateModel(
             name='ShippingNoticeLog',
@@ -159,6 +163,14 @@ class Migration(migrations.Migration):
             fields=[
                 ('log_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='logistics.log')),
                 ('received_item', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, to='logistics.receiveditem')),
+            ],
+            bases=('logistics.log',),
+        ),
+        migrations.CreateModel(
+            name='PackageLog',
+            fields=[
+                ('log_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='logistics.log')),
+                ('package', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, to='logistics.package')),
             ],
             bases=('logistics.log',),
         ),
