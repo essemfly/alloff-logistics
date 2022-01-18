@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package received_item;
+
+import "google/protobuf/empty.proto";
+
+service ReceivedItemController {
+    rpc List(ReceivedItemListRequest) returns (stream ReceivedItem) {}
+    rpc Create(ReceivedItem) returns (ReceivedItem) {}
+    rpc Retrieve(ReceivedItemRetrieveRequest) returns (ReceivedItem) {}
+    rpc Update(ReceivedItem) returns (ReceivedItem) {}
+    rpc Destroy(ReceivedItem) returns (google.protobuf.Empty) {}
+}
+
+message ReceivedItem {
+    int64 id = 1;
+    string code = 2;
+    string status = 3;
+    string product_id = 4;
+    string product_name = 5;
+    string product_brand_id = 6;
+    string product_brand_name = 7;
+    string product_size = 8;
+    string product_color = 9;
+    string created_at = 10;
+    string updated_at = 11;
+    string deleted_at = 12;
+    int64 inventory = 13;
+}
+
+message ReceivedItemListRequest {
+}
+
+message ReceivedItemRetrieveRequest {
+    int64 id = 1;
+}

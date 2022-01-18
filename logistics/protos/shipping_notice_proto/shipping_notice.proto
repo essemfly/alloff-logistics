@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package shipping_notice;
+
+import "google/protobuf/empty.proto";
+
+service ShippingNoticeController {
+    rpc List(ShippingNoticeListRequest) returns (stream ShippingNotice) {}
+    rpc Create(ShippingNotice) returns (ShippingNotice) {}
+    rpc Retrieve(ShippingNoticeRetrieveRequest) returns (ShippingNotice) {}
+    rpc Update(ShippingNotice) returns (ShippingNotice) {}
+    rpc Destroy(ShippingNotice) returns (google.protobuf.Empty) {}
+}
+
+message ShippingNotice {
+    int64 id = 1;
+    string code = 2;
+    string status = 3;
+    string template_url = 4;
+    string locked_at = 5;
+    string sealed_at = 6;
+    string shipped_at = 7;
+    string created_at = 8;
+    string updated_at = 9;
+}
+
+message ShippingNoticeListRequest {
+}
+
+message ShippingNoticeRetrieveRequest {
+    int64 id = 1;
+}
