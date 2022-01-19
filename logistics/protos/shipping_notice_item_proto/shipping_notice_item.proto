@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package shipping_notice_item;
+
+import "google/protobuf/empty.proto";
+
+service ShippingNoticeItemController {
+    rpc List(ShippingNoticeItemListRequest) returns (stream ShippingNoticeItem) {}
+    rpc Create(ShippingNoticeItem) returns (ShippingNoticeItem) {}
+    rpc Retrieve(ShippingNoticeItemRetrieveRequest) returns (ShippingNoticeItem) {}
+    rpc Update(ShippingNoticeItem) returns (ShippingNoticeItem) {}
+    rpc Destroy(ShippingNoticeItem) returns (google.protobuf.Empty) {}
+}
+
+message ShippingNoticeItem {
+    int64 id = 1;
+    int64 notice = 2;
+    int64 inventory = 3;
+}
+
+message ShippingNoticeItemListRequest {
+}
+
+message ShippingNoticeItemRetrieveRequest {
+    int64 id = 1;
+}
