@@ -82,13 +82,14 @@ class OrderItem(models.Model):
         self.create_received_item()
 
     def create_received_item(self):
-        ReceivedItem.objects.create(
-            code=self.order_item_code,
-            status=ReceivedItemStatus.SOURCING_REQUIRED,
-            product_brand_id=self.brand_key_name,
-            product_brand_name=self.brand_key_name,
-            product_id=self.alloff_product_id,
-            product_name=self.product_name,
-            product_size=self.size,
-            product_color=self.color,
-        )
+        for _ in range(self.quantity):
+            ReceivedItem.objects.create(
+                code=self.order_item_code,
+                status=ReceivedItemStatus.SOURCING_REQUIRED,
+                product_brand_id=self.brand_key_name,
+                product_brand_name=self.brand_key_name,
+                product_id=self.alloff_product_id,
+                product_name=self.product_name,
+                product_size=self.size,
+                product_color=self.color,
+            )

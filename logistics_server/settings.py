@@ -53,6 +53,9 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    # frameworks
+    "django_grpc_framework",
+    # applications
     "logistics",
     "order",
 ]

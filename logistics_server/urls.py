@@ -16,6 +16,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
+from logistics.handlers import grpc_handlers as logistics_grpc_handlers
+
 urlpatterns = [
     path("admin/", admin.site.urls),
 ]
+
+
+def grpc_handlers(server):
+    logistics_grpc_handlers(server)

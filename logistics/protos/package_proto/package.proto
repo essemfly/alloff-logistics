@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package package;
+
+import "google/protobuf/empty.proto";
+
+service PackageController {
+    rpc List(PackageListRequest) returns (stream Package) {}
+    rpc Create(Package) returns (Package) {}
+    rpc Retrieve(PackageRetrieveRequest) returns (Package) {}
+    rpc Update(Package) returns (Package) {}
+    rpc Destroy(Package) returns (google.protobuf.Empty) {}
+}
+
+message Package {
+    int64 id = 1;
+    string key = 2;
+    string status = 3;
+    string related_order_item_ids = 4;
+    string customer_name = 5;
+    string customer_contact = 6;
+    string base_address = 7;
+    string detail_address = 8;
+    string postal_code = 9;
+    string delivery_note = 10;
+    string tracking_number = 11;
+    string created_at = 12;
+    string updated_at = 13;
+    string deleted_at = 14;
+    int64 remark_records = 15;
+    int64 inventories = 16;
+    int64 tracking_courier = 17;
+}
+
+message PackageListRequest {
+}
+
+message PackageRetrieveRequest {
+    int64 id = 1;
+}

@@ -30,6 +30,7 @@ coverage.xml
 # etc
 .DS_Store
 
+.scripts
 *.sh
 
 /static
