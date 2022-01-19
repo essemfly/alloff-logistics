@@ -50,6 +50,11 @@ OR
 .. code-block:: bash
 
     poetry run ./manage.py runserver
-    # OR
-    poetry run ./manage.py runserver_plus # _plus supports interactive debugging
 
+
+Run gRPC server
+---------------
+
+.. code-block:: bash
+
+    poetry run ./manage.py grpcrunserver --dev # default port 50051
