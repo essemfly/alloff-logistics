@@ -25,7 +25,15 @@ class Order(models.Model):
 
     # user
     user = models.JSONField()
-    user_note = models.CharField(max_length=50)
+    user_note = models.CharField(max_length=50, null=True, blank=True)
+
+    # destination address
+    customer_name = models.CharField(max_length=20)
+    customer_contact = models.CharField(max_length=13)
+    base_address = models.CharField(max_length=255)
+    detail_address = models.CharField(max_length=50, null=True, blank=True)
+    postal_code = models.CharField(max_length=6)
+    delivery_note = models.CharField(max_length=50, null=True, blank=True)
 
     # price
     product_price = models.IntegerField()

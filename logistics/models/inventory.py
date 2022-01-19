@@ -1,5 +1,7 @@
 from django.db import models
 
+from logistics.models.package import Package
+
 
 from .common import Log
 
@@ -27,6 +29,14 @@ class Inventory(models.Model):
     product_size = models.CharField(max_length=10)
     product_color = models.CharField(max_length=10)
 
+    package = models.ForeignKey(
+        Package,
+        on_delete=models.DO_NOTHING,
+        null=True,
+        blank=True,
+        related_name="inventory",
+    )
+
     location = models.CharField(max_length=50, null=False, blank=True)
     memo = models.TextField(null=False, blank=True)
 
@@ -38,7 +48,9 @@ class Inventory(models.Model):
         verbose_name_plural = "inventories"
 
     def __str__(self):
-        return f"#{self.id} {self.product_name} ({self.code})"
+        return (
+            f"#{self.id} [{self.product_brand_name}] {self.product_name} ({self.code})"
+        )
 
     def change_status(self, request, status):
         if status == self.status:  # same status
@@ -60,6 +72,17 @@ class Inventory(models.Model):
     @property
     def product_code(self):
         return f"{self.product_brand_name}___{''.join(self.product_name.split())}___{''.join(self.product_size.split())}"
+
+    @property
+    def product_option(self):
+        return f"{self.product_color}___{''.join(self.product_size.split())}"
+
+    @property
+    def order_id(self):
+        received_item = self.received_item.get()
+        if received_item is not None:
+            return received_item.order_id
+        return None
 
 
 class InventoryLog(Log):

@@ -1,4 +1,4 @@
-from django.contrib import admin
+from django.contrib import admin, messages
 from logistics.models.received_item import (
     ReceivedItem,
     ReceivedItemStatus,
@@ -6,6 +6,7 @@ from logistics.models.received_item import (
 )
 from lib.helpers import create_copy_button, create_filter_button, format_date
 from lib.admin import LogTabularInline
+from logistics.models.shipping_notice import ShippingNotice, ShippingNoticeItem
 
 
 received_item_status = {
@@ -68,6 +69,7 @@ class ReceivedItemAdmin(admin.ModelAdmin):
         "make_received",
         "make_out_of_stock",
         "make_canceled",
+        "generate_shipping_notice",
     ]
 
     @admin.action(
@@ -103,10 +105,27 @@ class ReceivedItemAdmin(admin.ModelAdmin):
         self._change_status(status=ReceivedItemStatus.CANCELED, *args, **kwargs)
 
     def _change_status(self, request, queryset, status):
-        [
+        for instance in queryset:
             instance.change_status(
                 request=request,
                 status=status,
             )
+
+    @admin.action(
+        description="Generate shipping notice include selected items",
+    )
+    def generate_shipping_notice(self, request, queryset):
+        if any(
+            instance.status == ReceivedItemStatus.RECEIVED
             for instance in queryset.all()
-        ]
+        ):
+            shipping_notice = ShippingNotice.objects.create()
+            for instance in queryset:
+                ShippingNoticeItem.objects.create(
+                    order_item_id=instance.order_item_id,
+                    notice=shipping_notice,
+                    inventory=instance.inventory,
+                )
+        else:
+            # error message
+            messages.error(request, "ONLY Received could be collected")
